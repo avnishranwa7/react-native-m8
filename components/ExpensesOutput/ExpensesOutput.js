@@ -5,65 +5,23 @@ import { View, Text, FlatList, StyleSheet } from "react-native";
 import { GlobalStyles } from "../../constants/style";
 import ExpenseItem from "./ExpenseItem";
 
-const DUMMY_EXPENSES = [
-  {
-    id: "e1",
-    description: "A pair of shoes",
-    amount: 59.99,
-    date: new Date("2024-04-12"),
-  },
-  {
-    id: "e2",
-    description: "A pair of trousers",
-    amount: 89.29,
-    date: new Date("2024-04-30"),
-  },
-  {
-    id: "e3",
-    description: "Some bananas",
-    amount: 5.99,
-    date: new Date("2024-05-01"),
-  },
-  {
-    id: "e4",
-    description: "A book",
-    amount: 14.99,
-    date: new Date("2024-05-04"),
-  },
-  {
-    id: "e5",
-    description: "Another book",
-    amount: 18.59,
-    date: new Date("2024-04-05"),
-  },
-  {
-    id: "e6",
-    description: "Another book",
-    amount: 18.59,
-    date: new Date("2024-04-05"),
-  },
-  {
-    id: "e7",
-    description: "Another book",
-    amount: 18.59,
-    date: new Date("2024-04-05"),
-  },
-];
-
 function renderExpenseItem(item) {
   return <ExpenseItem {...item.item} />;
 }
 
-const ExpensesOutput = ({ expenses, expensesPeriod }) => {
-  const expenseSum = DUMMY_EXPENSES.reduce((sum, curr) => sum + curr.amount, 0);
+const ExpensesOutput = ({ expenses, expensesPeriod, fallbackText }) => {
+  const expenseSum = expenses.reduce((sum, curr) => sum + curr.amount, 0);
   return (
     <View style={styles.rootView}>
       <View style={styles.summaryView}>
         <Text style={styles.period}>{expensesPeriod}</Text>
         <Text style={styles.sum}>${expenseSum.toFixed(2)}</Text>
       </View>
+      {expenses.length === 0 && (
+        <Text style={styles.infoText}>{fallbackText}</Text>
+      )}
       <FlatList
-        data={DUMMY_EXPENSES}
+        data={expenses}
         keyExtractor={(item) => item.id}
         renderItem={renderExpenseItem}
       />
@@ -96,5 +54,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
     color: GlobalStyles.colors.primary500,
+  },
+  infoText: {
+    color: "white",
+    fontSize: 16,
+    textAlign: "center",
+    marginTop: 32,
   },
 });

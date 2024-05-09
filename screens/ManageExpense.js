@@ -1,12 +1,15 @@
-import React, { useLayoutEffect } from "react";
+import React, { useContext, useLayoutEffect } from "react";
 import { StyleSheet, View } from "react-native";
 
 // local imports
 import IconButton from "../components/UI/IconButton";
 import { GlobalStyles } from "../constants/style";
-import Button from "../components/UI/Button";
+import { ExpensesContext } from "../store/expenses-context";
+import ExpenseForm from "../components/ManageExpense/ExpenseForm";
 
 const ManageExpense = ({ navigation, route }) => {
+  const expensesCtx = useContext(ExpensesContext);
+
   const expenseId = route.params?.expenseId;
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -15,6 +18,7 @@ const ManageExpense = ({ navigation, route }) => {
   }, [navigation, expenseId]);
 
   function deleteExpenseHandler() {
+    expensesCtx.deleteExpense(expenseId);
     navigation.goBack();
   }
 
@@ -22,20 +26,22 @@ const ManageExpense = ({ navigation, route }) => {
     navigation.goBack();
   }
 
-  function confirmHandler() {
+  function confirmHandler(expenseData) {
+    if (expenseId) {
+      expensesCtx.updateExpense(expenseId, expenseData);
+    } else {
+      expensesCtx.addExpense(expenseData);
+    }
     navigation.goBack();
   }
 
   return (
     <View style={styles.rootView}>
-      <View style={styles.buttons}>
-        <Button mode="flat" onPress={cancelHandler} style={styles.button}>
-          Cancel
-        </Button>
-        <Button onPress={confirmHandler} style={styles.button}>
-          {expenseId ? "Update" : "Add"}
-        </Button>
-      </View>
+      <ExpenseForm
+        onCancel={cancelHandler}
+        onSubmit={confirmHandler}
+        expenseId={expenseId}
+      />
       {expenseId && (
         <View style={styles.deleteView}>
           <IconButton
@@ -57,15 +63,6 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 24,
     backgroundColor: GlobalStyles.colors.primary800,
-  },
-  buttons: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  button: {
-    minWidth: 120,
-    marginHorizontal: 8,
   },
   deleteView: {
     marginTop: 16,
