@@ -1,4 +1,4 @@
-import React, { useContext, useLayoutEffect } from "react";
+import React, { useContext, useLayoutEffect, useState } from "react";
 import { StyleSheet, View } from "react-native";
 
 // local imports
@@ -6,8 +6,14 @@ import IconButton from "../components/UI/IconButton";
 import { GlobalStyles } from "../constants/style";
 import { ExpensesContext } from "../store/expenses-context";
 import ExpenseForm from "../components/ManageExpense/ExpenseForm";
+import { deleteExpense, storeExpense, updateExpense } from "../util/http";
+import LoadingOverlay from "../components/UI/LoadingOverlay";
+import ErrorOverlay from "../components/UI/ErrorOverlay";
 
 const ManageExpense = ({ navigation, route }) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState();
+
   const expensesCtx = useContext(ExpensesContext);
 
   const expenseId = route.params?.expenseId;
@@ -17,23 +23,41 @@ const ManageExpense = ({ navigation, route }) => {
     });
   }, [navigation, expenseId]);
 
-  function deleteExpenseHandler() {
-    expensesCtx.deleteExpense(expenseId);
-    navigation.goBack();
+  async function deleteExpenseHandler() {
+    setLoading(true);
+    try {
+      expensesCtx.deleteExpense(expenseId);
+      await deleteExpense(expenseId);
+      navigation.goBack();
+    } catch (err) {
+      setLoading(false);
+      setError("Could not delete expense");
+    }
   }
 
   function cancelHandler() {
     navigation.goBack();
   }
 
-  function confirmHandler(expenseData) {
-    if (expenseId) {
-      expensesCtx.updateExpense(expenseId, expenseData);
-    } else {
-      expensesCtx.addExpense(expenseData);
+  async function confirmHandler(expenseData) {
+    setLoading(true);
+    try {
+      if (expenseId) {
+        expensesCtx.updateExpense(expenseId, expenseData);
+        await updateExpense(expenseId, expenseData);
+      } else {
+        const id = await storeExpense(expenseData);
+        expensesCtx.addExpense({ ...expenseData, id });
+      }
+      navigation.goBack();
+    } catch (err) {
+      setLoading(false);
+      setError("Could not save expense");
     }
-    navigation.goBack();
   }
+
+  if (loading) return <LoadingOverlay />;
+  if (error) return <ErrorOverlay message={error} />;
 
   return (
     <View style={styles.rootView}>

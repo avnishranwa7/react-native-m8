@@ -5,53 +5,11 @@ export const ExpensesContext = createContext({
   addExpense: ({ description, amount, date }) => {},
   deleteExpense: (id) => {},
   updateExpense: (id, { description, amount, date }) => {},
+  set: (expenses) => {},
 });
 
 const ExpensesContextProvider = ({ children }) => {
-  const [expenses, setExpenses] = useState([
-    {
-      id: "e1",
-      description: "A pair of shoes",
-      amount: 59.99,
-      date: new Date("2024-04-12"),
-    },
-    {
-      id: "e2",
-      description: "A pair of trousers",
-      amount: 89.29,
-      date: new Date("2024-04-30"),
-    },
-    {
-      id: "e3",
-      description: "Some bananas",
-      amount: 5.99,
-      date: new Date("2024-05-01"),
-    },
-    {
-      id: "e4",
-      description: "A book",
-      amount: 14.99,
-      date: new Date("2024-05-04"),
-    },
-    {
-      id: "e5",
-      description: "Another book",
-      amount: 18.59,
-      date: new Date("2024-04-05"),
-    },
-    {
-      id: "e6",
-      description: "Another book",
-      amount: 18.59,
-      date: new Date("2024-04-05"),
-    },
-    {
-      id: "e7",
-      description: "Another book",
-      amount: 18.59,
-      date: new Date("2024-04-05"),
-    },
-  ]);
+  const [expenses, setExpenses] = useState([]);
 
   function addExpense({ description, amount, date }) {
     const id = new Date().toString() + Math.random.toString();
@@ -74,7 +32,11 @@ const ExpensesContextProvider = ({ children }) => {
     );
   }
 
-  const value = { expenses, addExpense, deleteExpense, updateExpense };
+  function set(expenses) {
+    setExpenses(expenses);
+  }
+
+  const value = { expenses, addExpense, deleteExpense, updateExpense, set };
 
   return (
     <ExpensesContext.Provider value={value}>
